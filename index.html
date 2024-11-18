@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 2D Transformation</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .slider-container {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive 2D Transformation with Infinite Eigenvectors</h1>
+    <div id="plot"></div>
+
+    <div class="slider-container">
+        <label>Adjust Coordinates of Point A (X): <span id="ax-value">28.82</span></label>
+        <input type="range" id="slider-ax" min="-60" max="60" step="0.1" value="28.82">
+    </div>
+    <div class="slider-container">
+        <label>Adjust Coordinates of Point A (Y): <span id="ay-value">-0.86</span></label>
+        <input type="range" id="slider-ay" min="-60" max="60" step="0.1" value="-0.86">
+    </div>
+
+    <script>
+        // Define transformation matrix M
+        const M = [[0.6, 0.3], [-0.2, 1.4]];
+
+        // Function to multiply matrix and vector
+        function matrixMultiply(matrix, vector) {
+            return [
+                matrix[0][0] * vector[0] + matrix[0][1] * vector[1],
+                matrix[1][0] * vector[0] + matrix[1][1] * vector[1]
+            ];
+        }
+
+        // Function to generate sequence
+        function generateSequence(point, matrix, steps = 40) {
+            const sequence = [point];
+            for (let i = 0; i < steps - 1; i++) {
+                point = matrixMultiply(matrix, point);
+                sequence.push(point);
+            }
+            return sequence;
+        }
+
+        // Initial plot
+        const axSlider = document.getElementById("slider-ax");
+        const aySlider = document.getElementById("slider-ay");
+        const axValue = document.getElementById("ax-value");
+        const ayValue = document.getElementById("ay-value");
+
+        function updatePlot() {
+            const ax = parseFloat(axSlider.value);
+            const ay = parseFloat(aySlider.value);
+            axValue.textContent = ax.toFixed(2);
+            ayValue.textContent = ay.toFixed(2);
+
+            // Generate sequence
+            const sequenceA = generateSequence([ax, ay], M);
+
+            // Prepare data for Plotly
+            const traceA = {
+                x: sequenceA.map(p => p[0]),
+                y: sequenceA.map(p => p[1]),
+                mode: 'lines+markers',
+                name: `Sequence A (A: [${ax.toFixed(2)}, ${ay.toFixed(2)}])`,
+                marker: { color: 'red' }
+            };
+
+            const data = [traceA];
+
+            const layout = {
+                title: 'Interactive 2D Transformation',
+                xaxis: { title: 'X', range: [-60, 60] },
+                yaxis: { title: 'Y', range: [-60, 60] }
+            };
+
+            Plotly.newPlot('plot', data, layout);
+        }
+
+        // Event listeners for sliders
+        axSlider.addEventListener("input", updatePlot);
+        aySlider.addEventListener("input", updatePlot);
+
+        // Initial render
+        updatePlot();
+    </script>
+</body>
+</html>
