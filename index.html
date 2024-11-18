@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive 2D Transformation</title>
+    <title>Interactive 2D Transformation with Trackpad Zoom</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {
@@ -13,12 +13,16 @@
         .slider-container {
             margin-bottom: 20px;
         }
+        label {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h1>Interactive 2D Transformation with Infinite Eigenvectors</h1>
+    <h1>Interactive 2D Transformation with Trackpad Zoom</h1>
     <div id="plot"></div>
 
+    <!-- Sliders for Point A -->
     <div class="slider-container">
         <label>Adjust Coordinates of Point A (X): <span id="ax-value">28.82</span></label>
         <input type="range" id="slider-ax" min="-60" max="60" step="0.1" value="28.82">
@@ -26,6 +30,26 @@
     <div class="slider-container">
         <label>Adjust Coordinates of Point A (Y): <span id="ay-value">-0.86</span></label>
         <input type="range" id="slider-ay" min="-60" max="60" step="0.1" value="-0.86">
+    </div>
+
+    <!-- Sliders for Point B -->
+    <div class="slider-container">
+        <label>Adjust Coordinates of Point B (X): <span id="bx-value">19.71</span></label>
+        <input type="range" id="slider-bx" min="-60" max="60" step="0.1" value="19.71">
+    </div>
+    <div class="slider-container">
+        <label>Adjust Coordinates of Point B (Y): <span id="by-value">3.79</span></label>
+        <input type="range" id="slider-by" min="-60" max="60" step="0.1" value="3.79">
+    </div>
+
+    <!-- Sliders for Point C -->
+    <div class="slider-container">
+        <label>Adjust Coordinates of Point C (X): <span id="cx-value">40.96</span></label>
+        <input type="range" id="slider-cx" min="-60" max="60" step="0.1" value="40.96">
+    </div>
+    <div class="slider-container">
+        <label>Adjust Coordinates of Point C (Y): <span id="cy-value">6.62</span></label>
+        <input type="range" id="slider-cy" min="-60" max="60" step="0.1" value="6.62">
     </div>
 
     <script>
@@ -50,20 +74,48 @@
             return sequence;
         }
 
-        // Initial plot
-        const axSlider = document.getElementById("slider-ax");
-        const aySlider = document.getElementById("slider-ay");
-        const axValue = document.getElementById("ax-value");
-        const ayValue = document.getElementById("ay-value");
+        // Function to compute eigenvectors
+        function computeEigenvectors(matrix) {
+            const a = matrix[0][0], b = matrix[0][1];
+            const c = matrix[1][0], d = matrix[1][1];
+            const trace = a + d;
+            const det = a * d - b * c;
+            const discriminant = Math.sqrt(trace * trace - 4 * det);
 
+            const eigenvalue1 = (trace + discriminant) / 2;
+            const eigenvalue2 = (trace - discriminant) / 2;
+
+            const eigenvector1 = [1, (eigenvalue1 - a) / b];
+            const eigenvector2 = [1, (eigenvalue2 - a) / b];
+
+            return [eigenvector1, eigenvector2];
+        }
+
+        // Update the plot
         function updatePlot() {
-            const ax = parseFloat(axSlider.value);
-            const ay = parseFloat(aySlider.value);
+            const ax = parseFloat(axSlider.value), ay = parseFloat(aySlider.value);
+            const bx = parseFloat(bxSlider.value), by = parseFloat(bySlider.value);
+            const cx = parseFloat(cxSlider.value), cy = parseFloat(cySlider.value);
+
             axValue.textContent = ax.toFixed(2);
             ayValue.textContent = ay.toFixed(2);
+            bxValue.textContent = bx.toFixed(2);
+            byValue.textContent = by.toFixed(2);
+            cxValue.textContent = cx.toFixed(2);
+            cyValue.textContent = cy.toFixed(2);
 
-            // Generate sequence
-            const sequenceA = generateSequence([ax, ay], M);
+            // Points A, B, C
+            const A = [ax, ay];
+            const B = [bx, by];
+            const C = [cx, cy];
+
+            // Generate sequences
+            const sequenceA = generateSequence(A, M);
+            const sequenceB = generateSequence(B, M);
+            const sequenceC = generateSequence(C, M);
+
+            // Compute eigenvectors
+            const [eigenvector1, eigenvector2] = computeEigenvectors(M);
 
             // Prepare data for Plotly
             const traceA = {
@@ -74,22 +126,81 @@
                 marker: { color: 'red' }
             };
 
-            const data = [traceA];
-
-            const layout = {
-                title: 'Interactive 2D Transformation',
-                xaxis: { title: 'X', range: [-60, 60] },
-                yaxis: { title: 'Y', range: [-60, 60] }
+            const traceB = {
+                x: sequenceB.map(p => p[0]),
+                y: sequenceB.map(p => p[1]),
+                mode: 'lines+markers',
+                name: `Sequence B (B: [${bx.toFixed(2)}, ${by.toFixed(2)}])`,
+                marker: { color: 'blue' }
             };
 
-            Plotly.newPlot('plot', data, layout);
+            const traceC = {
+                x: sequenceC.map(p => p[0]),
+                y: sequenceC.map(p => p[1]),
+                mode: 'lines+markers',
+                name: `Sequence C (C: [${cx.toFixed(2)}, ${cy.toFixed(2)}])`,
+                marker: { color: 'green' }
+            };
+
+            const eigenvectorTrace1 = {
+                x: [-100 * eigenvector1[0], 100 * eigenvector1[0]],
+                y: [-100 * eigenvector1[1], 100 * eigenvector1[1]],
+                mode: 'lines',
+                line: { color: 'purple', dash: 'dash' },
+                name: 'Eigenvector 1'
+            };
+
+            const eigenvectorTrace2 = {
+                x: [-100 * eigenvector2[0], 100 * eigenvector2[0]],
+                y: [-100 * eigenvector2[1], 100 * eigenvector2[1]],
+                mode: 'lines',
+                line: { color: 'orange', dash: 'dash' },
+                name: 'Eigenvector 2'
+            };
+
+            const data = [traceA, traceB, traceC, eigenvectorTrace1, eigenvectorTrace2];
+
+            const layout = {
+                title: 'Interactive 2D Transformation with Infinite Eigenvectors',
+                xaxis: { title: 'X', range: [-60, 60] },
+                yaxis: { title: 'Y', range: [-60, 60] },
+                showlegend: true,
+                dragmode: 'pan', // Enables panning
+                hovermode: 'closest'
+            };
+
+            const config = {
+                responsive: true,
+                scrollZoom: true // Enables zooming with the trackpad or scroll wheel
+            };
+
+            Plotly.newPlot('plot', data, layout, config);
         }
 
-        // Event listeners for sliders
+        // Get slider elements
+        const axSlider = document.getElementById("slider-ax");
+        const aySlider = document.getElementById("slider-ay");
+        const bxSlider = document.getElementById("slider-bx");
+        const bySlider = document.getElementById("slider-by");
+        const cxSlider = document.getElementById("slider-cx");
+        const cySlider = document.getElementById("slider-cy");
+
+        const axValue = document.getElementById("ax-value");
+        const ayValue = document.getElementById("ay-value");
+        const bxValue = document.getElementById("bx-value");
+        const byValue = document.getElementById("by-value");
+        const cxValue = document.getElementById("cx-value");
+        const cyValue = document.getElementById("cy-value");
+
+        // Add event listeners
         axSlider.addEventListener("input", updatePlot);
         aySlider.addEventListener("input", updatePlot);
+        bxSlider.addEventListener("input", updatePlot);
+        bySlider.addEventListener("input", updatePlot);
+        cxSlider.addEventListener("input", updatePlot);
+        cySlider.addEventListener("input", updatePlot);
 
-        // Initial render
+        // Initial plot
         updatePlot();
     </script>
 </body>
