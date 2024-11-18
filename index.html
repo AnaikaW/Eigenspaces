@@ -92,90 +92,91 @@
         }
 
         // Update the plot
+  
         function updatePlot() {
-            const ax = parseFloat(axSlider.value), ay = parseFloat(aySlider.value);
-            const bx = parseFloat(bxSlider.value), by = parseFloat(bySlider.value);
-            const cx = parseFloat(cxSlider.value), cy = parseFloat(cySlider.value);
+    const ax = parseFloat(axSlider.value), ay = parseFloat(aySlider.value);
+    const bx = parseFloat(bxSlider.value), by = parseFloat(bySlider.value);
+    const cx = parseFloat(cxSlider.value), cy = parseFloat(cySlider.value);
 
-            axValue.textContent = ax.toFixed(2);
-            ayValue.textContent = ay.toFixed(2);
-            bxValue.textContent = bx.toFixed(2);
-            byValue.textContent = by.toFixed(2);
-            cxValue.textContent = cx.toFixed(2);
-            cyValue.textContent = cy.toFixed(2);
+    axValue.textContent = ax.toFixed(2);
+    ayValue.textContent = ay.toFixed(2);
+    bxValue.textContent = bx.toFixed(2);
+    byValue.textContent = by.toFixed(2);
+    cxValue.textContent = cx.toFixed(2);
+    cyValue.textContent = cy.toFixed(2);
 
-            // Points A, B, C
-            const A = [ax, ay];
-            const B = [bx, by];
-            const C = [cx, cy];
+    // Points A, B, C
+    const A = [ax, ay];
+    const B = [bx, by];
+    const C = [cx, cy];
 
-            // Generate sequences
-            const sequenceA = generateSequence(A, M);
-            const sequenceB = generateSequence(B, M);
-            const sequenceC = generateSequence(C, M);
+    // Generate sequences
+    const sequenceA = generateSequence(A, M);
+    const sequenceB = generateSequence(B, M);
+    const sequenceC = generateSequence(C, M);
 
-            // Compute eigenvectors
-            const [eigenvector1, eigenvector2] = computeEigenvectors(M);
+    // Compute eigenvectors
+    const [eigenvector1, eigenvector2] = computeEigenvectors(M);
 
-            // Prepare data for Plotly
-            const traceA = {
-                x: sequenceA.map(p => p[0]),
-                y: sequenceA.map(p => p[1]),
-                mode: 'lines+markers',
-                name: `Sequence A (A: [${ax.toFixed(2)}, ${ay.toFixed(2)}])`,
-                marker: { color: 'red' }
-            };
+    // Prepare data for Plotly
+    const traceA = {
+        x: sequenceA.map(p => p[0]),
+        y: sequenceA.map(p => p[1]),
+        mode: 'lines+markers',
+        name: `Sequence A (A: [${ax.toFixed(2)}, ${ay.toFixed(2)}])`,
+        marker: { color: 'red' } // Distinct color for sequence A
+    };
 
-            const traceB = {
-                x: sequenceB.map(p => p[0]),
-                y: sequenceB.map(p => p[1]),
-                mode: 'lines+markers',
-                name: `Sequence B (B: [${bx.toFixed(2)}, ${by.toFixed(2)}])`,
-                marker: { color: 'blue' }
-            };
+    const traceB = {
+        x: sequenceB.map(p => p[0]),
+        y: sequenceB.map(p => p[1]),
+        mode: 'lines+markers',
+        name: `Sequence B (B: [${bx.toFixed(2)}, ${by.toFixed(2)}])`,
+        marker: { color: 'blue' } // Distinct color for sequence B
+    };
 
-            const traceC = {
-                x: sequenceC.map(p => p[0]),
-                y: sequenceC.map(p => p[1]),
-                mode: 'lines+markers',
-                name: `Sequence C (C: [${cx.toFixed(2)}, ${cy.toFixed(2)}])`,
-                marker: { color: 'green' }
-            };
+    const traceC = {
+        x: sequenceC.map(p => p[0]),
+        y: sequenceC.map(p => p[1]),
+        mode: 'lines+markers',
+        name: `Sequence C (C: [${cx.toFixed(2)}, ${cy.toFixed(2)}])`,
+        marker: { color: 'green' } // Distinct color for sequence C
+    };
 
-            const eigenvectorTrace1 = {
-                x: [-100 * eigenvector1[0], 100 * eigenvector1[0]],
-                y: [-100 * eigenvector1[1], 100 * eigenvector1[1]],
-                mode: 'lines',
-                line: { color: 'purple', dash: 'dash' },
-                name: 'Eigenvector 1'
-            };
+    const eigenvectorTrace1 = {
+        x: [-1000 * eigenvector1[0], 1000 * eigenvector1[0]],  // Extended eigenvector to 1000 units
+        y: [-1000 * eigenvector1[1], 1000 * eigenvector1[1]],  // Extended eigenvector to 1000 units
+        mode: 'lines',
+        line: { color: 'purple', dash: 'dash' },  // Similar color for eigenvector 1
+        name: 'Eigenvector 1'
+    };
 
-            const eigenvectorTrace2 = {
-                x: [-100 * eigenvector2[0], 100 * eigenvector2[0]],
-                y: [-100 * eigenvector2[1], 100 * eigenvector2[1]],
-                mode: 'lines',
-                line: { color: 'orange', dash: 'dash' },
-                name: 'Eigenvector 2'
-            };
+    const eigenvectorTrace2 = {
+        x: [-1000 * eigenvector2[0], 1000 * eigenvector2[0]],  // Extended eigenvector to 1000 units
+        y: [-1000 * eigenvector2[1], 1000 * eigenvector2[1]],  // Extended eigenvector to 1000 units
+        mode: 'lines',
+        line: { color: 'violet', dash: 'dash' },  // Similar color for eigenvector 2
+        name: 'Eigenvector 2'
+    };
 
-            const data = [traceA, traceB, traceC, eigenvectorTrace1, eigenvectorTrace2];
+    const data = [traceA, traceB, traceC, eigenvectorTrace1, eigenvectorTrace2];
 
-            const layout = {
-                title: 'Interactive 2D Transformation with Infinite Eigenvectors',
-                xaxis: { title: 'X', range: [-60, 60] },
-                yaxis: { title: 'Y', range: [-60, 60] },
-                showlegend: true,
-                dragmode: 'pan', // Enables panning
-                hovermode: 'closest'
-            };
+    const layout = {
+        title: 'Interactive 2D Transformation with Infinite Eigenvectors',
+        xaxis: { title: 'X', range: [-60, 60] },  // Default axis range to [-60, 60]
+        yaxis: { title: 'Y', range: [-60, 60] },  // Default axis range to [-60, 60]
+        showlegend: true,
+        dragmode: 'pan', // Enables panning
+        hovermode: 'closest'
+    };
 
-            const config = {
-                responsive: true,
-                scrollZoom: true // Enables zooming with the trackpad or scroll wheel
-            };
+    const config = {
+        responsive: true,
+        scrollZoom: true // Enables zooming with the trackpad or scroll wheel
+    };
 
-            Plotly.newPlot('plot', data, layout, config);
-        }
+    Plotly.newPlot('plot', data, layout, config);
+}
 
         // Get slider elements
         const axSlider = document.getElementById("slider-ax");
