@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive 2D Transformation with Trackpad Zoom</title>
+    <title>Interactive 2D Transformation with Input Fields</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        .slider-container {
-            margin-bottom: 20px;
+        .input-container {
+            margin-bottom: 10px;
         }
         label {
             font-weight: bold;
+        }
+        input[type="number"] {
+            width: 60px;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -22,41 +26,45 @@
     <h1>Eigenspaces and Dynamical Systems</h1>
     <div id="plot"></div>
 
-    <!-- Sliders for Point A -->
-    <div class="slider-container">
-        <label>Adjust Coordinates of Point A (X): <span id="ax-value">28.82</span></label>
-        <input type="range" id="slider-ax" min="-60" max="60" step="0.1" value="28.82">
+    <!-- Inputs for Matrix M -->
+    <h2>Enter Transformation Matrix M</h2>
+    <div class="input-container">
+        <label>M[0][0]:</label>
+        <input type="number" id="input-m00" step="0.01" value="0.6">
+        <label>M[0][1]:</label>
+        <input type="number" id="input-m01" step="0.01" value="0.3">
     </div>
-    <div class="slider-container">
-        <label>Adjust Coordinates of Point A (Y): <span id="ay-value">-0.86</span></label>
-        <input type="range" id="slider-ay" min="-60" max="60" step="0.1" value="-0.86">
-    </div>
-
-    <!-- Sliders for Point B -->
-    <div class="slider-container">
-        <label>Adjust Coordinates of Point B (X): <span id="bx-value">19.71</span></label>
-        <input type="range" id="slider-bx" min="-60" max="60" step="0.1" value="19.71">
-    </div>
-    <div class="slider-container">
-        <label>Adjust Coordinates of Point B (Y): <span id="by-value">3.79</span></label>
-        <input type="range" id="slider-by" min="-60" max="60" step="0.1" value="3.79">
+    <div class="input-container">
+        <label>M[1][0]:</label>
+        <input type="number" id="input-m10" step="0.01" value="-0.2">
+        <label>M[1][1]:</label>
+        <input type="number" id="input-m11" step="0.01" value="1.4">
     </div>
 
-    <!-- Sliders for Point C -->
-    <div class="slider-container">
-        <label>Adjust Coordinates of Point C (X): <span id="cx-value">40.96</span></label>
-        <input type="range" id="slider-cx" min="-60" max="60" step="0.1" value="40.96">
+    <!-- Inputs for Points -->
+    <h2>Enter Points</h2>
+    <div class="input-container">
+        <label>Point A (X):</label>
+        <input type="number" id="input-ax" step="0.1" value="28.82">
+        <label>Point A (Y):</label>
+        <input type="number" id="input-ay" step="0.1" value="-0.86">
     </div>
-    <div class="slider-container">
-        <label>Adjust Coordinates of Point C (Y): <span id="cy-value">6.62</span></label>
-        <input type="range" id="slider-cy" min="-60" max="60" step="0.1" value="6.62">
+    <div class="input-container">
+        <label>Point B (X):</label>
+        <input type="number" id="input-bx" step="0.1" value="19.71">
+        <label>Point B (Y):</label>
+        <input type="number" id="input-by" step="0.1" value="3.79">
+    </div>
+    <div class="input-container">
+        <label>Point C (X):</label>
+        <input type="number" id="input-cx" step="0.1" value="40.96">
+        <label>Point C (Y):</label>
+        <input type="number" id="input-cy" step="0.1" value="6.62">
     </div>
 
     <script>
-        // Define transformation matrix M
         const M = [[0.6, 0.3], [-0.2, 1.4]];
 
-        // Function to multiply matrix and vector
         function matrixMultiply(matrix, vector) {
             return [
                 matrix[0][0] * vector[0] + matrix[0][1] * vector[1],
@@ -64,7 +72,6 @@
             ];
         }
 
-        // Function to generate sequence
         function generateSequence(point, matrix, steps = 40) {
             const sequence = [point];
             for (let i = 0; i < steps - 1; i++) {
@@ -74,7 +81,6 @@
             return sequence;
         }
 
-        // Function to compute eigenvectors
         function computeEigenvectors(matrix) {
             const a = matrix[0][0], b = matrix[0][1];
             const c = matrix[1][0], d = matrix[1][1];
@@ -91,117 +97,95 @@
             return [eigenvector1, eigenvector2];
         }
 
-        // Update the plot
-  
         function updatePlot() {
-    const ax = parseFloat(axSlider.value), ay = parseFloat(aySlider.value);
-    const bx = parseFloat(bxSlider.value), by = parseFloat(bySlider.value);
-    const cx = parseFloat(cxSlider.value), cy = parseFloat(cySlider.value);
+            const ax = parseFloat(document.getElementById("input-ax").value);
+            const ay = parseFloat(document.getElementById("input-ay").value);
+            const bx = parseFloat(document.getElementById("input-bx").value);
+            const by = parseFloat(document.getElementById("input-by").value);
+            const cx = parseFloat(document.getElementById("input-cx").value);
+            const cy = parseFloat(document.getElementById("input-cy").value);
 
-    axValue.textContent = ax.toFixed(2);
-    ayValue.textContent = ay.toFixed(2);
-    bxValue.textContent = bx.toFixed(2);
-    byValue.textContent = by.toFixed(2);
-    cxValue.textContent = cx.toFixed(2);
-    cyValue.textContent = cy.toFixed(2);
+            const m00 = parseFloat(document.getElementById("input-m00").value);
+            const m01 = parseFloat(document.getElementById("input-m01").value);
+            const m10 = parseFloat(document.getElementById("input-m10").value);
+            const m11 = parseFloat(document.getElementById("input-m11").value);
 
-    // Points A, B, C
-    const A = [ax, ay];
-    const B = [bx, by];
-    const C = [cx, cy];
+            M[0][0] = m00; M[0][1] = m01;
+            M[1][0] = m10; M[1][1] = m11;
 
-    // Generate sequences
-    const sequenceA = generateSequence(A, M);
-    const sequenceB = generateSequence(B, M);
-    const sequenceC = generateSequence(C, M);
+            const A = [ax, ay];
+            const B = [bx, by];
+            const C = [cx, cy];
 
-    // Compute eigenvectors
-    const [eigenvector1, eigenvector2] = computeEigenvectors(M);
+            const sequenceA = generateSequence(A, M);
+            const sequenceB = generateSequence(B, M);
+            const sequenceC = generateSequence(C, M);
 
-    // Prepare data for Plotly
-    const traceA = {
-        x: sequenceA.map(p => p[0]),
-        y: sequenceA.map(p => p[1]),
-        mode: 'lines+markers',
-        name: `Sequence A (A: [${ax.toFixed(2)}, ${ay.toFixed(2)}])`,
-        marker: { color: 'red' } // Distinct color for sequence A
-    };
+            const [eigenvector1, eigenvector2] = computeEigenvectors(M);
 
-    const traceB = {
-        x: sequenceB.map(p => p[0]),
-        y: sequenceB.map(p => p[1]),
-        mode: 'lines+markers',
-        name: `Sequence B (B: [${bx.toFixed(2)}, ${by.toFixed(2)}])`,
-        marker: { color: 'blue' } // Distinct color for sequence B
-    };
+            const traceA = {
+                x: sequenceA.map(p => p[0]),
+                y: sequenceA.map(p => p[1]),
+                mode: 'lines+markers',
+                name: 'Sequence A',
+                marker: { color: 'red' }
+            };
 
-    const traceC = {
-        x: sequenceC.map(p => p[0]),
-        y: sequenceC.map(p => p[1]),
-        mode: 'lines+markers',
-        name: `Sequence C (C: [${cx.toFixed(2)}, ${cy.toFixed(2)}])`,
-        marker: { color: 'green' } // Distinct color for sequence C
-    };
+            const traceB = {
+                x: sequenceB.map(p => p[0]),
+                y: sequenceB.map(p => p[1]),
+                mode: 'lines+markers',
+                name: 'Sequence B',
+                marker: { color: 'blue' }
+            };
 
-    const eigenvectorTrace1 = {
-        x: [-1000 * eigenvector1[0], 1000 * eigenvector1[0]],  // Extended eigenvector to 1000 units
-        y: [-1000 * eigenvector1[1], 1000 * eigenvector1[1]],  // Extended eigenvector to 1000 units
-        mode: 'lines',
-        line: { color: 'purple', dash: 'dash' },  // Similar color for eigenvector 1
-        name: 'Eigenvector 1'
-    };
+            const traceC = {
+                x: sequenceC.map(p => p[0]),
+                y: sequenceC.map(p => p[1]),
+                mode: 'lines+markers',
+                name: 'Sequence C',
+                marker: { color: 'green' }
+            };
 
-    const eigenvectorTrace2 = {
-        x: [-1000 * eigenvector2[0], 1000 * eigenvector2[0]],  // Extended eigenvector to 1000 units
-        y: [-1000 * eigenvector2[1], 1000 * eigenvector2[1]],  // Extended eigenvector to 1000 units
-        mode: 'lines',
-        line: { color: 'violet', dash: 'dash' },  // Similar color for eigenvector 2
-        name: 'Eigenvector 2'
-    };
+            const eigenvectorTrace1 = {
+                x: [-1000 * eigenvector1[0], 1000 * eigenvector1[0]],
+                y: [-1000 * eigenvector1[1], 1000 * eigenvector1[1]],
+                mode: 'lines',
+                line: { color: 'purple', dash: 'dash' },
+                name: 'Eigenvector 1'
+            };
 
-    const data = [traceA, traceB, traceC, eigenvectorTrace1, eigenvectorTrace2];
+            const eigenvectorTrace2 = {
+                x: [-1000 * eigenvector2[0], 1000 * eigenvector2[0]],
+                y: [-1000 * eigenvector2[1], 1000 * eigenvector2[1]],
+                mode: 'lines',
+                line: { color: 'violet', dash: 'dash' },
+                name: 'Eigenvector 2'
+            };
 
-    const layout = {
-        title: 'Eigenspaces and Dynamical Systems',
-        xaxis: { title: 'X', range: [-60, 60] },  // Default axis range to [-60, 60]
-        yaxis: { title: 'Y', range: [-60, 60] },  // Default axis range to [-60, 60]
-        showlegend: true,
-        dragmode: 'pan', // Enables panning
-        hovermode: 'closest'
-    };
+            const data = [traceA, traceB, traceC, eigenvectorTrace1, eigenvectorTrace2];
 
-    const config = {
-        responsive: true,
-        scrollZoom: true // Enables zooming with the trackpad or scroll wheel
-    };
+            const layout = {
+                title: 'Eigenspaces and Dynamical Systems',
+                xaxis: { title: 'X', range: [-60, 60] },
+                yaxis: { title: 'Y', range: [-60, 60] },
+                showlegend: true,
+                dragmode: 'pan',
+                hovermode: 'closest'
+            };
 
-    Plotly.newPlot('plot', data, layout, config);
-}
+            const config = {
+                responsive: true,
+                scrollZoom: true
+            };
 
-        // Get slider elements
-        const axSlider = document.getElementById("slider-ax");
-        const aySlider = document.getElementById("slider-ay");
-        const bxSlider = document.getElementById("slider-bx");
-        const bySlider = document.getElementById("slider-by");
-        const cxSlider = document.getElementById("slider-cx");
-        const cySlider = document.getElementById("slider-cy");
+            Plotly.newPlot('plot', data, layout, config);
+        }
 
-        const axValue = document.getElementById("ax-value");
-        const ayValue = document.getElementById("ay-value");
-        const bxValue = document.getElementById("bx-value");
-        const byValue = document.getElementById("by-value");
-        const cxValue = document.getElementById("cx-value");
-        const cyValue = document.getElementById("cy-value");
+        document.querySelectorAll("input").forEach(input => {
+            input.addEventListener("input", updatePlot);
+        });
 
-        // Add event listeners
-        axSlider.addEventListener("input", updatePlot);
-        aySlider.addEventListener("input", updatePlot);
-        bxSlider.addEventListener("input", updatePlot);
-        bySlider.addEventListener("input", updatePlot);
-        cxSlider.addEventListener("input", updatePlot);
-        cySlider.addEventListener("input", updatePlot);
-
-        // Initial plot
         updatePlot();
     </script>
 </body>
